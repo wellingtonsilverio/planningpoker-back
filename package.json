@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node ./app.ts",
+    "start": "ts-node ./src/index.ts",
     "build": "tsc",
-    "dev": "nodemon app.ts",
+    "dev": "nodemon src/index.ts",
     "lint": "eslint \"{src,test}/**/*.{js,ts}\"",
     "lint:fix": "npm run lint -- --fix",
     "test": "jest",
