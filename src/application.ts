@@ -14,9 +14,8 @@ server.use(applicationRouter);
 const io = new Server(http.createServer(server));
 
 export function startServer(): void {
-  console.log('startServer');
   const host: string = process.env.HOST || 'localhost';
-  const port: number = Number(process.env.PORT) || 3333;
+  const port: number = Number(process.env.PORT) || 8080;
 
   // Lista de clientes na sala de espera
   const room: any = {};

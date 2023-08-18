@@ -12,5 +12,5 @@ COPY package*.json ./
 COPY --from=build-image ./usr/src/app/dist ./dist
 RUN npm ci --production
 COPY . .
-EXPOSE 3333
+EXPOSE 8080
 CMD [ "node", "dist/index.js" ]
