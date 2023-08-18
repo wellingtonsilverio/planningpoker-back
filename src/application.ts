@@ -68,7 +68,7 @@ export function startServer(): void {
     });
   });
 
-  server.listen(port, host, () => {
+  server.listen(port, () => {
     console.log(`Server started at http://${host}:${port}`);
   });
 }
