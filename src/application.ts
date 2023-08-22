@@ -4,71 +4,35 @@ import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
 import { applicationRouter } from './routes';
-
-const server: Express = express();
-server.use(bodyParser.json());
-server.use(bodyParser.urlencoded({ extended: true }));
-server.use(cors());
-server.use(applicationRouter);
-
-const io = new Server(http.createServer(server));
+import { startScoket } from './sockets';
 
 export function startServer(): void {
-  const host: string = process.env.HOST || 'localhost';
-  const port: number = Number(process.env.PORT) || 8080;
+  const PORT: number = Number(process.env.PORT) || 8080;
+  const SOCKET_PORT: number = Number(process.env.SOCKET_PORT) || 8081;
 
-  // Lista de clientes na sala de espera
-  const room: any = {};
+  const app: Express = express();
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(
+    cors({
+      origin: '*',
+    }),
+  );
+  app.use(applicationRouter);
 
-  io.on('connection', (socket) => {
-    console.log(`Cliente conectado: ${socket.id}`);
+  const server = http.createServer(app);
 
-    let userRoom: any;
+  const io = new Server(server);
 
-    // Entrar na sala de espera
-    socket.on('joinWaitingRoom', (roomId) => {
-      // Caso não exista a sala ainda, é criada
-      if (!room[roomId]) room[roomId] = [];
-      userRoom = roomId;
+  startScoket(io);
 
-      room[roomId].push(socket.id);
-      socket.emit('waitingMessage', 'Você está na sala de espera.');
+  server.listen(PORT, () => {
+    console.log(`Server started at PORT: ${PORT}`);
 
-      // Notificar todos os clientes na sala de espera sobre o novo cliente
-      io.emit('waitingClientsUpdated', room[roomId].length);
+    io.listen(SOCKET_PORT, {
+      cors: {
+        origin: '*',
+      },
     });
-
-    // Deixar a sala de espera
-    socket.on('leaveWaitingRoom', () => {
-      if (!userRoom) return;
-
-      const index = room[userRoom].indexOf(socket.id);
-      if (index !== -1) {
-        room[userRoom].splice(index, 1);
-        socket.emit('waitingMessage', 'Você saiu da sala de espera.');
-
-        // Notificar todos os clientes na sala de espera sobre a saída do cliente
-        io.emit('waitingClientsUpdated', room[userRoom].length);
-      }
-    });
-
-    socket.on('disconnect', () => {
-      console.log(`Cliente desconectado: ${socket.id}`);
-
-      if (!userRoom) return;
-
-      // Remover o cliente da sala de espera, se estiver lá
-      const index = room[userRoom].indexOf(socket.id);
-      if (index !== -1) {
-        room[userRoom].splice(index, 1);
-
-        // Notificar todos os clientes na sala de espera sobre a saída do cliente
-        io.emit('waitingClientsUpdated', room[userRoom].length);
-      }
-    });
-  });
-
-  server.listen(port, () => {
-    console.log(`Server started at PORT: ${port}`);
   });
 }

@@ -14,6 +14,7 @@
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
       "paths": {
         "*": [
           "node_modules/*"
